@@ -129,7 +129,8 @@ export class MoodleClient {
         },
         body: body.toString(),
       });
-    } catch {
+    } catch (error) {
+      if (error instanceof MoodleApiError) throw error;
       throw explainFetchFailure(baseUrl);
     }
 
@@ -166,13 +167,19 @@ export class MoodleClient {
     },
   ): Promise<ResponseLike> {
     if (isExtensionBridgeAvailable()) {
-      const response = await requestThroughExtension({
-        url,
-        method: init.method,
-        headers: init.headers,
-        body: init.body,
-      });
-      return bridgeResponseToResponseLike(response);
+      try {
+        const response = await requestThroughExtension({
+          url,
+          method: init.method,
+          headers: init.headers,
+          body: init.body,
+        });
+        return bridgeResponseToResponseLike(response);
+      } catch (error) {
+        throw new MoodleApiError(
+          error instanceof Error ? error.message : "Extension bridge request failed.",
+        );
+      }
     }
 
     const response = await fetch(url, {
@@ -208,7 +215,8 @@ export class MoodleClient {
         },
         body: payload.toString(),
       });
-    } catch {
+    } catch (error) {
+      if (error instanceof MoodleApiError) throw error;
       throw explainFetchFailure(this.baseUrl);
     }
 

@@ -1,14 +1,16 @@
 {
-  "name": "stats-moodle-web",
+  "name": "moodlia-analyzer-web",
   "private": true,
   "type": "module",
   "version": "0.1.0",
-  "description": "Client-side web application that reproduces the core Moodle analysis workflow of the desktop Python project in a React + Vite stack.",
+  "description": "MoodlIA client-side web application for Moodle course and student analysis.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run",
+    "check": "npm run lint && npm test && npm run build"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +32,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.58.2",
-    "vite": "^8.0.8"
+    "vite": "^8.0.8",
+    "vitest": "^4.1.10"
   }
 }

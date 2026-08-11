@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { JSX } from "react";
-import { AlertTriangle, Brain, ChevronRight, GraduationCap, KeyRound, LoaderCircle } from "lucide-react";
+import { Brain, ChevronRight, GraduationCap, KeyRound, LoaderCircle } from "lucide-react";
 
 import { AiSettingsDialog } from "../common/AiSettingsDialog";
 import { DEFAULT_FORM } from "../../constants/ui";
+import { probeExtensionBridge } from "../../lib/extensionBridge";
 import { translate } from "../../lib/i18n";
 import type { AiSettings, ConnectFormValues, ConnectionProfile, LanguageCode } from "../../types";
 
@@ -23,6 +24,12 @@ export function ConnectionScreen(props: ConnectionScreenProps): JSX.Element {
   const [form, setForm] = useState<ConnectFormValues>(DEFAULT_FORM);
   const [showAiSettings, setShowAiSettings] = useState(false);
   const t = (key: Parameters<typeof translate>[1]) => translate(props.language, key);
+
+  useEffect(() => {
+    if (!props.extensionBridgeAvailable) {
+      probeExtensionBridge();
+    }
+  }, [props.extensionBridgeAvailable]);
 
   function fillFromProfile(profile: ConnectionProfile): void {
     setForm({
@@ -87,22 +94,6 @@ export function ConnectionScreen(props: ConnectionScreenProps): JSX.Element {
           <span>{props.extensionBridgeAvailable ? t("extensionDetected") : t("extensionMissing")}</span>
         </div>
 
-        {!props.extensionBridgeAvailable ? (
-          <div className="extension-install-warning">
-            <div className="extension-install-warning__header">
-              <AlertTriangle size={18} />
-              <strong>{t("extensionRequired")}</strong>
-            </div>
-            <p>{t("extensionMissingBody")}</p>
-            <ol>
-              <li>{t("openChromeExtensions")}</li>
-              <li>{t("enableDeveloperMode")}</li>
-              <li>{t("loadUnpacked")}</li>
-              <li>{t("selectExtensionProject")}</li>
-              <li>{t("reloadPage")}</li>
-            </ol>
-          </div>
-        ) : null}
 
         <form className="grid-form" onSubmit={(event) => { event.preventDefault(); void props.onConnect(form); }}>
           <label>
