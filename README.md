@@ -1,4 +1,4 @@
-# Moodle Student Analyzer Web
+# MoodlIA Analyzer Web
 
 Client-side web application that reproduces the core Moodle analysis workflow of the desktop Python project in a React + Vite stack.
 
@@ -71,9 +71,7 @@ See `MOODLE_API_AUDIT.md` for the field-level audit summary used to expand the f
 
 ## Chrome Extension Bridge
 
-The Chrome MV3 extension now lives in the separate project:
-
-- `D:\ProyectosIA\proxy extension`
+The Chrome MV3 extension lives in the separate `moodlia-browser-bridge` project.
 
 Use it when:
 
@@ -85,9 +83,9 @@ Load it in Chrome:
 1. Open `chrome://extensions`
 2. Enable **Developer mode**
 3. Click **Load unpacked**
-4. Select `D:\ProyectosIA\proxy extension`
+4. Select your local `moodlia-browser-bridge` project directory
 
-Once installed on the same browser/profile as the app, the web UI will detect it automatically and route Moodle API requests through the extension.
+Once installed on the same browser/profile as the app, the web UI will detect the `proxy-extension` bridge automatically and route Moodle API requests through it.
 
 If the extension is not installed, the connection screen now shows an explicit installation warning with the required steps.
 
@@ -142,3 +140,11 @@ http://localhost:5173
 
 - Local Git is initialized and connected to GitHub.
 - Main branch pushes are currently going to `origin/main`.
+
+## Quality Checks
+
+```bash
+npm run check
+```
+
+This command runs linting, behavioral tests, TypeScript checking, and the production build. Tests cover Moodle authentication and REST requests, optional-endpoint fallbacks, student metrics, and browser persistence.

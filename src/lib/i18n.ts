@@ -7,7 +7,7 @@ export const supportedLanguages: Record<LanguageCode, string> = {
 
 const messages = {
   en: {
-    appName: "Moodle Student Analyzer",
+    appName: "MoodlIA Analyzer",
     appTagline: "Browser-first analytics workspace for Moodle courses.",
     runtimeLabel: "React + Vite + Moodle REST",
     disconnect: "Disconnect",
@@ -35,10 +35,11 @@ const messages = {
     extensionMissing: "Chrome extension bridge not detected. You need to install it if the Moodle server blocks browser requests with CORS.",
     extensionRequired: "Chrome extension required for CORS-blocked Moodle sites",
     extensionMissingBody: "This app can detect the bridge automatically, but it is not installed in the current browser profile.",
+    extensionDownload: "Download the extension from",
     openChromeExtensions: "Open chrome://extensions",
     enableDeveloperMode: "Enable Developer mode",
     loadUnpacked: "Click Load unpacked",
-    selectExtensionProject: "Select D:\\ProyectosIA\\proxy extension",
+    selectExtensionProject: "Select your local moodlia-browser-bridge project directory",
     reloadPage: "Reload this page and confirm that the bridge is detected",
     profileName: "Profile name",
     moodleUrl: "Moodle URL",
@@ -360,7 +361,7 @@ const messages = {
     riskLow: "Low",
   },
   es: {
-    appName: "Moodle Student Analyzer",
+    appName: "MoodlIA Analyzer",
     appTagline: "Espacio de analisis para cursos Moodle en el navegador.",
     runtimeLabel: "React + Vite + Moodle REST",
     disconnect: "Desconectar",
@@ -388,10 +389,11 @@ const messages = {
     extensionMissing: "No se ha detectado la extension puente de Chrome. Debes instalarla si el servidor Moodle bloquea las peticiones del navegador por CORS.",
     extensionRequired: "La extension de Chrome es necesaria para sitios Moodle bloqueados por CORS",
     extensionMissingBody: "La app puede detectar el puente automaticamente, pero no esta instalado en el perfil actual del navegador.",
+    extensionDownload: "Descarga la extension desde",
     openChromeExtensions: "Abre chrome://extensions",
     enableDeveloperMode: "Activa Developer mode",
     loadUnpacked: "Pulsa Load unpacked",
-    selectExtensionProject: "Selecciona D:\\ProyectosIA\\proxy extension",
+    selectExtensionProject: "Selecciona el directorio local del proyecto moodlia-browser-bridge",
     reloadPage: "Recarga esta pagina y confirma que el puente aparece detectado",
     profileName: "Nombre del perfil",
     moodleUrl: "URL de Moodle",

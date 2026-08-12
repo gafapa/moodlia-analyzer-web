@@ -229,6 +229,7 @@ function App(): JSX.Element {
         <Suspense fallback={<ScreenFallback title={t("waiting")} />}>
           {analysis && activeStudent ? (
             <StudentDetailScreen
+              key={`${analysis.course.id}:${activeStudent.id}`}
               client={session.client}
               analysis={analysis}
               aiSettings={aiSettings}

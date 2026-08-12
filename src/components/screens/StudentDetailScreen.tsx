@@ -118,12 +118,6 @@ export function StudentDetailScreen(props: StudentDetailScreenProps): JSX.Elemen
     });
   }, [activeTab, activitySubtab, assessmentsSubtab, overviewSubtab, props.analysis.course.id, props.student.id, studentKey]);
 
-  useEffect(() => {
-    setQuestionAnalytics(null);
-    setQuestionAnalyticsLoading(false);
-    setQuestionAnalyticsError(null);
-  }, [props.student.id]);
-
   const classMetrics = useMemo(() => props.analysis.students.map((student) => student.metrics), [props.analysis.students]);
 
   const percentileData = useMemo(() => {

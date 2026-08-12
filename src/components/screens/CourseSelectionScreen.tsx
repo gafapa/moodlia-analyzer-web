@@ -44,7 +44,16 @@ export function CourseSelectionScreen(props: CourseSelectionScreenProps): JSX.El
   }, [props.client, t]);
 
   useEffect(() => {
-    void loadCourses(mode);
+    let active = true;
+    void Promise.resolve().then(() => {
+      if (active) {
+        return loadCourses(mode);
+      }
+      return undefined;
+    });
+    return () => {
+      active = false;
+    };
   }, [loadCourses, mode]);
 
   const filteredCourses = useMemo(() => {
