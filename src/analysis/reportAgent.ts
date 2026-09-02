@@ -1,15 +1,16 @@
 ﻿import { reportLanguageName } from "../lib/i18n";
 import type { AiSettings, CourseAnalysis, LanguageCode, StudentAnalysis } from "../types";
+import { normalizeServiceBaseUrl } from "../lib/urlSecurity";
 
 function ensureV1BaseUrl(baseUrl: string): string {
-  const trimmed = baseUrl.replace(/\/+$/, "");
+  const trimmed = normalizeServiceBaseUrl(baseUrl, "AI provider URL");
   return trimmed.endsWith("/v1") ? trimmed : `${trimmed}/v1`;
 }
 
 function buildCourseContext(analysis: CourseAnalysis): Record<string, unknown> {
   const students = analysis.students
     .map((student) => ({
-      name: student.fullname,
+      studentId: student.id,
       risk: student.riskLevel,
       riskProbability: student.prediction.riskProbability,
       currentGradePct: student.metrics.finalGradePct,
@@ -22,7 +23,6 @@ function buildCourseContext(analysis: CourseAnalysis): Record<string, unknown> {
   return {
     course: {
       id: analysis.course.id,
-      name: analysis.course.fullname ?? analysis.course.shortname ?? "Course",
       totalStudents: analysis.courseMetrics.totalStudents,
     },
     courseMetrics: analysis.courseMetrics,
@@ -36,12 +36,9 @@ function buildStudentContext(analysis: CourseAnalysis, student: StudentAnalysis)
   return {
     course: {
       id: analysis.course.id,
-      name: analysis.course.fullname ?? analysis.course.shortname ?? "Course",
     },
     student: {
       id: student.id,
-      name: student.fullname,
-      email: student.email,
       riskLevel: student.riskLevel,
       riskFactors: student.riskFactors,
       recommendations: student.recommendations,
@@ -71,6 +68,7 @@ async function requestReport(
 
   const response = await fetch(`${ensureV1BaseUrl(settings.baseUrl)}/chat/completions`, {
     method: "POST",
+    redirect: "error",
     headers: {
       "Content-Type": "application/json",
       ...(settings.apiKey ? { Authorization: `Bearer ${settings.apiKey}` } : {}),

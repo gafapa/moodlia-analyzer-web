@@ -13,7 +13,7 @@ import {
   isExtensionBridgeAvailable,
   subscribeExtensionBridgeAvailability,
 } from "./lib/extensionBridge";
-import { loadCachedAnalysis, saveCachedAnalysis } from "./lib/analysisCache";
+import { clearCachedAnalyses, loadCachedAnalysis, saveCachedAnalysis } from "./lib/analysisCache";
 import { supportedLanguages, translate } from "./lib/i18n";
 import {
   deleteProfile,
@@ -33,8 +33,6 @@ import type {
   CourseSummary,
   LanguageCode,
 } from "./types";
-
-const CACHE_MAX_AGE_MS = 1000 * 60 * 60 * 4;
 
 const CourseSelectionScreen = lazy(async () => {
   const module = await import("./components/screens/CourseSelectionScreen");
@@ -139,10 +137,7 @@ function App(): JSX.Element {
       setAnalysis(cached.analysis);
       setSelectedStudentId(null);
 
-      const ageMs = Date.now() - new Date(cached.savedAt).getTime();
-      if (ageMs <= CACHE_MAX_AGE_MS) {
-        return;
-      }
+      return;
     }
 
     setBusy(true);
@@ -222,6 +217,7 @@ function App(): JSX.Element {
           loading={busy}
           error={connectError}
           onDeleteProfile={(name) => setProfiles(deleteProfile(name))}
+          onClearCachedAnalyses={() => clearCachedAnalyses()}
           onConnect={handleConnect}
           onSaveAiSettings={handleSaveAiSettings}
         />

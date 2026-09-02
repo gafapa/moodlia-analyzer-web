@@ -4,6 +4,7 @@
   type BridgeHttpResponse,
 } from "../lib/extensionBridge";
 import type { CourseSummary, SiteInfo } from "../types";
+import { normalizeServiceBaseUrl } from "../lib/urlSecurity";
 
 type ApiParams = Record<string, unknown>;
 
@@ -97,7 +98,7 @@ export class MoodleClient {
   userFullName = "";
 
   constructor(baseUrl: string, token: string) {
-    this.baseUrl = baseUrl.replace(/\/+$/, "");
+    this.baseUrl = normalizeServiceBaseUrl(baseUrl, "Moodle URL");
     this.token = token.trim();
   }
 
@@ -113,7 +114,8 @@ export class MoodleClient {
     password: string,
     service = "moodle_mobile_app",
   ): Promise<MoodleClient> {
-    const tokenUrl = `${baseUrl.replace(/\/+$/, "")}/login/token.php`;
+    const normalizedBaseUrl = normalizeServiceBaseUrl(baseUrl, "Moodle URL");
+    const tokenUrl = `${normalizedBaseUrl}/login/token.php`;
     const body = new URLSearchParams({
       username,
       password,
@@ -131,7 +133,7 @@ export class MoodleClient {
       });
     } catch (error) {
       if (error instanceof MoodleApiError) throw error;
-      throw explainFetchFailure(baseUrl);
+      throw explainFetchFailure(normalizedBaseUrl);
     }
 
     if (!response.ok) {
@@ -148,7 +150,7 @@ export class MoodleClient {
       throw new MoodleApiError("The Moodle site did not return a token.");
     }
 
-    return MoodleClient.fromToken(baseUrl, token);
+    return MoodleClient.fromToken(normalizedBaseUrl, token);
   }
 
   async init(): Promise<void> {
@@ -164,6 +166,7 @@ export class MoodleClient {
       method?: string;
       headers?: Record<string, string>;
       body?: string;
+      redirect?: "error";
     },
   ): Promise<ResponseLike> {
     if (isExtensionBridgeAvailable()) {
@@ -173,6 +176,7 @@ export class MoodleClient {
           method: init.method,
           headers: init.headers,
           body: init.body,
+          redirect: "error",
         });
         return bridgeResponseToResponseLike(response);
       } catch (error) {
@@ -186,6 +190,7 @@ export class MoodleClient {
       method: init.method,
       headers: init.headers,
       body: init.body,
+      redirect: "error",
     });
 
     return {

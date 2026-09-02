@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { JSX } from "react";
-import { Brain, ChevronRight, GraduationCap, KeyRound, LoaderCircle } from "lucide-react";
+import { Brain, ChevronRight, GraduationCap, KeyRound, LoaderCircle, Trash2 } from "lucide-react";
 
 import { AiSettingsDialog } from "../common/AiSettingsDialog";
 import { DEFAULT_FORM } from "../../constants/ui";
@@ -16,6 +16,7 @@ export type ConnectionScreenProps = {
   loading: boolean;
   error: string | null;
   onDeleteProfile: (name: string) => void;
+  onClearCachedAnalyses: () => Promise<void>;
   onConnect: (values: ConnectFormValues) => Promise<void>;
   onSaveAiSettings: (settings: AiSettings) => void;
 };
@@ -23,6 +24,7 @@ export type ConnectionScreenProps = {
 export function ConnectionScreen(props: ConnectionScreenProps): JSX.Element {
   const [form, setForm] = useState<ConnectFormValues>(DEFAULT_FORM);
   const [showAiSettings, setShowAiSettings] = useState(false);
+  const [cacheStatus, setCacheStatus] = useState<string | null>(null);
   const t = (key: Parameters<typeof translate>[1]) => translate(props.language, key);
 
   useEffect(() => {
@@ -53,25 +55,40 @@ export function ConnectionScreen(props: ConnectionScreenProps): JSX.Element {
         <div className="profile-list">
           {props.profiles.length === 0 ? <div className="empty-note">{t("noSavedProfilesYet")}</div> : null}
           {props.profiles.map((profile) => (
-            <button key={profile.name} className="profile-chip" onClick={() => fillFromProfile(profile)}>
-              <span>
-                <strong>{profile.name}</strong>
-                <small>{profile.url}</small>
-              </span>
-              <span className="profile-chip__actions">
-                <ChevronRight size={16} />
-                <span
-                  className="profile-chip__delete"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    props.onDeleteProfile(profile.name);
-                  }}
-                >
-                  x
+            <div key={profile.name} className="profile-entry">
+              <button type="button" className="profile-chip" onClick={() => fillFromProfile(profile)}>
+                <span>
+                  <strong>{profile.name}</strong>
+                  <small>{profile.url}</small>
                 </span>
-              </span>
-            </button>
+                <ChevronRight aria-hidden="true" size={16} />
+              </button>
+              <button
+                type="button"
+                className="profile-delete-button"
+                aria-label={`${t("deleteProfile")} ${profile.name}`}
+                onClick={() => props.onDeleteProfile(profile.name)}
+              >
+                <Trash2 aria-hidden="true" size={16} />
+              </button>
+            </div>
           ))}
+        </div>
+        <div className="privacy-actions">
+          <button
+            className="ghost-button"
+            type="button"
+            onClick={() => {
+              setCacheStatus(null);
+              void props.onClearCachedAnalyses()
+                .then(() => setCacheStatus(t("cacheCleared")))
+                .catch(() => setCacheStatus(t("cacheClearFailed")));
+            }}
+          >
+            <Trash2 aria-hidden="true" size={16} />
+            {t("clearCachedAnalyses")}
+          </button>
+          {cacheStatus ? <p className="privacy-status" role="status" aria-live="polite">{cacheStatus}</p> : null}
         </div>
       </section>
 
@@ -83,14 +100,14 @@ export function ConnectionScreen(props: ConnectionScreenProps): JSX.Element {
             <p>{t("connectionHelpPrimary")}</p>
             <p>{t("connectionHelpSecondary")}</p>
           </div>
-          <button className="ghost-button" onClick={() => setShowAiSettings(true)}>
-            <Brain size={16} />
+          <button className="ghost-button" type="button" onClick={() => setShowAiSettings(true)}>
+            <Brain aria-hidden="true" size={16} />
             {t("aiSettings")}
           </button>
         </div>
 
         <div className={`bridge-banner ${props.extensionBridgeAvailable ? "is-available" : "is-missing"}`}>
-          <Brain size={16} />
+          <Brain aria-hidden="true" size={16} />
           <span>{props.extensionBridgeAvailable ? t("extensionDetected") : t("extensionMissing")}</span>
         </div>
 
@@ -102,19 +119,19 @@ export function ConnectionScreen(props: ConnectionScreenProps): JSX.Element {
           </label>
           <label>
             <span>{t("moodleUrl")}</span>
-            <input required value={form.baseUrl} onChange={(event) => setForm((current) => ({ ...current, baseUrl: event.target.value }))} placeholder="https://moodle.example.com" />
+            <input required type="url" inputMode="url" autoComplete="url" value={form.baseUrl} onChange={(event) => setForm((current) => ({ ...current, baseUrl: event.target.value }))} placeholder="https://moodle.example.com" />
           </label>
           <label>
             <span>{t("token")}</span>
-            <input value={form.token} onChange={(event) => setForm((current) => ({ ...current, token: event.target.value }))} placeholder={t("pasteExistingToken")} />
+            <input type="password" autoComplete="off" value={form.token} onChange={(event) => setForm((current) => ({ ...current, token: event.target.value }))} placeholder={t("pasteExistingToken")} />
           </label>
           <label>
             <span>{t("username")}</span>
-            <input value={form.username} onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))} placeholder={t("optionalWhenTokenPresent")} />
+            <input autoComplete="username" value={form.username} onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))} placeholder={t("optionalWhenTokenPresent")} />
           </label>
           <label>
             <span>{t("password")}</span>
-            <input type="password" value={form.password} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} placeholder={t("onlyUsedToRequestToken")} />
+            <input type="password" autoComplete="current-password" value={form.password} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} placeholder={t("onlyUsedToRequestToken")} />
           </label>
           <label className="checkbox-row">
             <input type="checkbox" checked={form.saveProfile} onChange={(event) => setForm((current) => ({ ...current, saveProfile: event.target.checked }))} />
@@ -122,12 +139,12 @@ export function ConnectionScreen(props: ConnectionScreenProps): JSX.Element {
           </label>
 
           <div className="form-note">
-            <KeyRound size={16} />
+            <KeyRound aria-hidden="true" size={16} />
             {t("generateToken")}
           </div>
-          {props.error ? <div className="error-banner">{props.error}</div> : null}
+          {props.error ? <div className="error-banner" role="alert">{props.error}</div> : null}
           <button className="primary-button primary-button--wide" disabled={props.loading} type="submit">
-            {props.loading ? <LoaderCircle className="spin" size={16} /> : <GraduationCap size={16} />}
+            {props.loading ? <LoaderCircle aria-hidden="true" className="spin" size={16} /> : <GraduationCap aria-hidden="true" size={16} />}
             {t("connect")}
           </button>
         </form>

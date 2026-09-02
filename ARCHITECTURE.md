@@ -10,8 +10,9 @@ Ship a browser-only Moodle analytics application that ports the analysis pipelin
 - Vite for development and production bundling
 - TypeScript for the application code
 - Browser `fetch` for Moodle REST access
-- Local storage for user profiles, language, and AI settings
-- IndexedDB for cached course analysis snapshots
+- Local storage for profile metadata, language, and non-secret AI settings
+- Session storage for Moodle tokens and AI API keys
+- IndexedDB for four-hour cached course analysis snapshots with explicit deletion
 
 ## Main Flows
 
@@ -103,9 +104,10 @@ Ship a browser-only Moodle analytics application that ports the analysis pipelin
 - `src/analysis/reportAgent.ts`
   - local OpenAI-compatible markdown reports for course and student scopes
 - `src/lib/storage.ts`
-  - browser persistence for profiles, language, AI settings, runtime diagnostics, and workspace preferences
+  - persistent profile metadata, language, runtime diagnostics, and workspace preferences
+  - session-only Moodle tokens and AI API keys
 - `src/lib/analysisCache.ts`
-  - IndexedDB persistence for cached course analyses
+  - four-hour IndexedDB persistence and explicit deletion for cached course analyses
 - `src/lib/courseInsights.ts`
   - recent-vs-previous comparison helpers
   - alert generation
@@ -130,9 +132,13 @@ Ship a browser-only Moodle analytics application that ports the analysis pipelin
 
 Browser local storage holds:
 
-- connection profiles
+- connection profile names, URLs, and optional usernames
 - UI language
-- AI provider settings
+- non-secret AI provider settings
+
+Browser session storage holds Moodle tokens and AI API keys. These secrets disappear when the browser session ends.
+
+IndexedDB holds cached course analyses for at most four hours. The connection screen provides an explicit cache deletion action.
 
 Passwords must never be persisted.
 
@@ -140,8 +146,10 @@ Passwords must never be persisted.
 
 - The application is read-only with respect to Moodle analysis flows.
 - Moodle passwords are used only for token generation and kept in memory only for the current action.
-- Tokens may be stored locally only when the user saves a profile.
+- Moodle tokens and AI API keys are never persisted beyond the browser session.
 - AI requests are sent directly from the browser to the configured endpoint.
+- AI report contexts omit student names and email addresses.
+- Remote service URLs require HTTPS, except for loopback development, and authenticated requests reject redirects.
 
 ## Live API Findings
 

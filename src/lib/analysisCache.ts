@@ -3,6 +3,12 @@ import type { CourseAnalysis } from "../types";
 const DATABASE_NAME = "moodle-analyzer-web";
 const DATABASE_VERSION = 1;
 const STORE_NAME = "analysis-cache";
+export const ANALYSIS_CACHE_MAX_AGE_MS = 1000 * 60 * 60 * 4;
+
+export function isAnalysisCacheFresh(savedAt: string, nowMs = Date.now()): boolean {
+  const savedAtMs = new Date(savedAt).getTime();
+  return Number.isFinite(savedAtMs) && nowMs - savedAtMs <= ANALYSIS_CACHE_MAX_AGE_MS;
+}
 
 export type AnalysisCacheMeta = {
   key: string;
@@ -82,9 +88,40 @@ export async function loadCachedAnalysis(
   passThresholdPct: number,
 ): Promise<AnalysisCacheEntry | null> {
   const key = buildAnalysisCacheKey(baseUrl, courseId, passThresholdPct);
-  return withStore("readonly", async (store) => {
+  const cached = await withStore("readonly", async (store) => {
     const entry = await requestToPromise(store.get(key));
     return (entry as AnalysisCacheEntry | undefined) ?? null;
+  });
+  if (!cached) {
+    return null;
+  }
+  if (!isAnalysisCacheFresh(cached.savedAt)) {
+    await deleteCachedAnalysis(key);
+    return null;
+  }
+  return cached;
+}
+
+export async function deleteCachedAnalysis(key: string): Promise<void> {
+  return withStore("readwrite", async (store) => {
+    await requestToPromise(store.delete(key));
+  });
+}
+
+export async function clearCachedAnalyses(baseUrl?: string): Promise<void> {
+  return withStore("readwrite", async (store) => {
+    if (!baseUrl) {
+      await requestToPromise(store.clear());
+      return;
+    }
+
+    const normalizedBaseUrl = baseUrl.replace(/\/+$/, "").toLowerCase();
+    const entries = (await requestToPromise(store.getAll())) as AnalysisCacheEntry[];
+    await Promise.all(
+      entries
+        .filter((entry) => entry.baseUrl.toLowerCase() === normalizedBaseUrl)
+        .map((entry) => requestToPromise(store.delete(entry.key))),
+    );
   });
 }
 

@@ -8,6 +8,7 @@ type BridgeRequestPayload = {
   method?: string;
   headers?: Record<string, string>;
   body?: string;
+  redirect?: "error";
 };
 
 type BridgeResponseMessage = {

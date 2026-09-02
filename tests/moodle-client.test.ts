@@ -28,9 +28,26 @@ describe('MoodleClient', () => {
     expect(requests).toHaveLength(2);
     expect(requests[0].url).toBe('https://example.test/moodle/login/token.php');
     expect(String(requests[0].init?.body)).toContain('service=moodle_mobile_app');
+    expect(requests[0].init?.redirect).toBe('error');
     const siteBody = new URLSearchParams(String(requests[1].init?.body));
     expect(siteBody.get('wsfunction')).toBe('core_webservice_get_site_info');
     expect(siteBody.get('wstoken')).toBe('rest-token');
+  });
+
+  it('rejects insecure remote URLs and embedded credentials before sending secrets', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    expect(() => new MoodleClient('http://moodle.example.test', 'token')).toThrow(/HTTPS/);
+    expect(() => new MoodleClient('https://user:secret@moodle.example.test', 'token')).toThrow(/credentials/);
+    await expect(MoodleClient.fromCredentials('https://moodle.example.test/?next=other', 'teacher', 'password'))
+      .rejects.toThrow(/query string/);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('allows loopback HTTP for local development', () => {
+    expect(new MoodleClient('http://127.0.0.1:8080/moodle/', 'token').baseUrl)
+      .toBe('http://127.0.0.1:8080/moodle');
   });
 
   it('flattens nested Moodle parameters into form fields', async () => {

@@ -8,7 +8,7 @@ Implemented as a frontend-only SPA.
 
 - No custom backend.
 - Data is fetched directly from the Moodle REST API from the browser.
-- Connection profiles, UI language, and AI settings are stored locally in the browser.
+- Profile names, Moodle URLs, UI language, and non-secret AI settings are stored locally in the browser. Moodle tokens and AI API keys remain in session storage and disappear when the browser session ends.
 
 ## Scope
 
@@ -28,7 +28,7 @@ The current web app includes:
 - Larger chart canvases for comparative views, heatmaps, and question review charts
 - Built-in explanations for every analysis block, now structured as short "what it shows / how to read it / why it matters" guides inside the chart surfaces
 - Persistent workspace navigation so the app remembers the last dashboard and student subviews
-- IndexedDB-backed local analysis cache keyed by Moodle host, course, and passing threshold for faster re-entry
+- IndexedDB-backed local analysis cache keyed by Moodle host, course, and passing threshold for faster re-entry; entries expire after four hours and can be cleared from the connection screen
 - Lazy-loaded analytics screens and chart-heavy workspaces to reduce the initial bundle and improve startup time
 - Trend comparison views that contrast the latest 7-day window against the previous one for course activity, participation, and submissions
 - Intervention center with automatic alerts, dynamic student segments, and a prioritized intervention queue
@@ -65,6 +65,8 @@ See `MOODLE_API_AUDIT.md` for the field-level audit summary used to expand the f
 - Browser access depends on the Moodle instance allowing the required REST endpoints and CORS policy.
 - Credential-based token generation is only possible when the Moodle site allows browser requests to `login/token.php`.
 - Local AI integrations expose requests from the browser directly to the configured endpoint.
+- AI report payloads omit student names and email addresses, but still contain internal identifiers and academic metrics. Use only an institution-approved endpoint.
+- Remote Moodle and AI-provider URLs must use HTTPS. HTTP is accepted only for loopback development services, and credential-bearing requests reject redirects.
 - Some Moodle tokens do not return reliable data from `core_enrol_get_my_courses`; the app already falls back to user-course and catalog endpoints to avoid an empty course picker.
 - Some Moodle services do not expose logs even when the rest of the course endpoints are available; the app treats logs as optional and keeps analysis working without them.
 - If Moodle returns invalid CORS headers, such as multiple `Access-Control-Allow-Origin` values, this frontend-only app cannot connect. In that case you need either a server-side fix or a backend/proxy.
@@ -127,7 +129,7 @@ http://localhost:5173
 - `src/constants/ui.ts`: shared UI constants such as risk colors and default form values.
 - `src/components/common/`: reusable UI building blocks such as tiles, tabs, heatmaps, report panes, dialogs, and loading overlays.
 - `src/components/screens/`: top-level application screens split by workflow stage.
-- `src/lib/analysisCache.ts`: IndexedDB storage for cached course analyses.
+- `src/lib/analysisCache.ts`: four-hour IndexedDB storage for cached course analyses, including explicit deletion controls.
 - `src/lib/courseInsights.ts`: derived trend, alert, intervention, and segmentation helpers.
 - `src/lib/extensionBridge.ts`: page-to-extension bridge for Chrome MV3.
 - `src/lib/storage.ts`: browser persistence for profiles, AI settings, language, runtime diagnostics, and workspace navigation preferences.
