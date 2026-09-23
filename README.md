@@ -150,3 +150,7 @@ npm run check
 ```
 
 This command runs linting, behavioral tests, TypeScript checking, and the production build. Tests cover Moodle authentication and REST requests, optional-endpoint fallbacks, student metrics, and browser persistence.
+
+## License
+
+Released under the MIT License. See `LICENSE`.
