@@ -153,6 +153,8 @@ npm run check
 
 This command runs linting, behavioral tests, TypeScript checking, and the production build. Tests cover Moodle authentication and REST requests, optional-endpoint fallbacks, student metrics, and browser persistence.
 
+The 2026-10-20 lockfile refresh applies compatible patches for `brace-expansion` and `source-map-js`. `npm audit --audit-level=high` reports no vulnerabilities for this lockfile; `npm run check` passes locally.
+
 ## License
 
 Released under the MIT License. See `LICENSE`.
