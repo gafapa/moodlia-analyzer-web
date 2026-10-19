@@ -50,15 +50,17 @@ Validated against a live Moodle instance on April 15, 2026:
 
 See `MOODLE_API_AUDIT.md` for the field-level audit summary used to expand the frontend analytics.
 
-## Stack
+## Declared dependency ranges
 
-- `react@19.2.5`
-- `react-dom@19.2.5`
-- `vite@8.0.8`
-- `typescript@6.0.2`
-- `framer-motion@12.38.0`
-- `recharts@3.8.1`
-- `lucide-react@1.8.0`
+- `react@^19.2.5`
+- `react-dom@^19.2.5`
+- `vite@^8.0.8`
+- `typescript@^6.0.2`
+- `framer-motion@^12.38.0`
+- `recharts@^3.8.1`
+- `lucide-react@^1.8.0`
+
+`package-lock.json` records the exact installed dependency versions; the ranges above come from `package.json`.
 
 ## Constraints
 
@@ -115,7 +117,7 @@ Default local execution target:
 Open the app locally with:
 
 ```text
-http://localhost:5173
+http://localhost:5173/moodlia-analyzer/
 ```
 
 ## Project Structure
