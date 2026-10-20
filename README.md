@@ -2,7 +2,11 @@
 
 Client-side web application that reproduces the core Moodle analysis workflow of the desktop Python project in a React + Vite stack.
 
+[Status](#status) · [Getting started](#getting-started) · [Usage](#usage) · [Development](#development) · [Security and privacy](#security-and-privacy) · [Documentation](#documentation) · [License](#license)
+
 ## Status
+
+Implemented frontend-only application. English and Spanish are maintained. Direct Moodle access depends on the site's REST permissions and browser CORS policy.
 
 Implemented as a frontend-only SPA.
 
@@ -10,90 +14,9 @@ Implemented as a frontend-only SPA.
 - Data is fetched directly from the Moodle REST API from the browser.
 - Profile names, Moodle URLs, UI language, and non-secret AI settings are stored locally in the browser. Moodle tokens and AI API keys remain in session storage and disappear when the browser session ends.
 
-## Scope
+## Getting started
 
-The current web app includes:
-
-- Moodle connection with token or credential-based token generation
-- Optional Chrome extension bridge for Moodle requests when browser CORS blocks direct access
-- White, high-contrast visual theme with a cleaner information hierarchy
-- Course listing and selection with a dedicated action card, inline threshold control, and direct double-click analysis
-- Course listings enriched with readable Moodle category names from the category catalog
-- Configurable passing threshold
-- Course-wide student analysis
-- Student risk classification and recommendations
-- Working UI language switching for shared labels and the main workflow screens
-- UI language support is now intentionally limited to English and Spanish, the two fully maintained catalogs
-- Nested tabbed course and student workspaces so each major area is split into focused subviews instead of one long scroll
-- Larger chart canvases for comparative views, heatmaps, and question review charts
-- Built-in explanations for every analysis block, now structured as short "what it shows / how to read it / why it matters" guides inside the chart surfaces
-- Persistent workspace navigation so the app remembers the last dashboard and student subviews
-- IndexedDB-backed local analysis cache keyed by Moodle host, course, and passing threshold for faster re-entry; entries expire after four hours and can be cleared from the connection screen
-- Lazy-loaded analytics screens and chart-heavy workspaces to reduce the initial bundle and improve startup time
-- Trend comparison views that contrast the latest 7-day window against the previous one for course activity, participation, and submissions
-- Intervention center with automatic alerts, dynamic student segments, and a prioritized intervention queue
-- Advanced student roster controls with quick filters, sorting, and CSV/JSON export
-- Expanded course analytics including engagement distributions, predicted vs actual grades, risk-ranked students, top-vs-bottom cohorts, course funnel, forum activity by risk, activity heatmaps, persistence vs consistency, submission punctuality, quiz performance by activity, course activity mix, section workload, completion bottlenecks, resource format distribution, assessment timelines, and assignment grading turnaround
-- Expanded student analytics including radar profile, percentile view, recent-vs-previous momentum summaries, quiz history, question-level quiz review, submission timing, weekly activity, activity heatmaps, submission status breakdown, forum interaction breakdown, tracked completion by activity type, grading turnaround per assignment, persistence and consistency indicators, and prediction summaries
-- Optional AI-assisted reports through a local OpenAI-compatible endpoint
-
-## Verified Moodle API Coverage
-
-Validated against a live Moodle instance on April 15, 2026:
-
-- Target instance: `https://centros.edu.xunta.gal/iesmontevila/aulavirtual`
-- The provided token exposed 467 web service functions through `core_webservice_get_site_info`.
-- `core_enrol_get_my_courses` can be sparse or incomplete for some tokens, so the client falls back to `core_enrol_get_users_courses` and then `core_course_get_courses`.
-- Verified working read endpoints for analytics included course contents, enrolled users, grade items, activity completion, assignments, assignment grades, submissions, quizzes, attempt review, forums, pages, resources, calendar action events, course modules, analytics contexts, and course grade overview.
-- `mod_quiz_get_attempt_review` is now used lazily from the student assessment workspace so the app can inspect question-level outcomes without slowing down the full-course analysis phase.
-- Verified live limitations included optional logs (`report_log_get_log` failed on this Moodle service) and course completion criteria (`core_completion_get_course_completion_status` returned `nocriteriaset` when the course did not define course-level completion rules).
-
-See `MOODLE_API_AUDIT.md` for the field-level audit summary used to expand the frontend analytics.
-
-## Declared dependency ranges
-
-- `react@^19.2.5`
-- `react-dom@^19.2.5`
-- `vite@^8.0.8`
-- `typescript@^6.0.2`
-- `framer-motion@^12.38.0`
-- `recharts@^3.8.1`
-- `lucide-react@^1.8.0`
-
-`package-lock.json` records the exact installed dependency versions; the ranges above come from `package.json`.
-
-## Constraints
-
-- Browser access depends on the Moodle instance allowing the required REST endpoints and CORS policy.
-- Credential-based token generation is only possible when the Moodle site allows browser requests to `login/token.php`.
-- Local AI integrations expose requests from the browser directly to the configured endpoint.
-- AI report payloads omit student names and email addresses, but still contain internal identifiers and academic metrics. Use only an institution-approved endpoint.
-- Remote Moodle and AI-provider URLs must use HTTPS. HTTP is accepted only for loopback development services, and credential-bearing requests reject redirects.
-- Some Moodle tokens do not return reliable data from `core_enrol_get_my_courses`; the app already falls back to user-course and catalog endpoints to avoid an empty course picker.
-- Some Moodle services do not expose logs even when the rest of the course endpoints are available; the app treats logs as optional and keeps analysis working without them.
-- If Moodle returns invalid CORS headers, such as multiple `Access-Control-Allow-Origin` values, this frontend-only app cannot connect. In that case you need either a server-side fix or a backend/proxy.
-
-## Chrome Extension Bridge
-
-The Chrome MV3 extension lives in the separate `moodlia-browser-bridge` project.
-
-Use it when:
-
-- the Moodle server has broken CORS headers
-- you still want to keep the main app frontend-only
-
-Load it in Chrome:
-
-1. Open `chrome://extensions`
-2. Enable **Developer mode**
-3. Click **Load unpacked**
-4. Select your local `moodlia-browser-bridge` project directory
-
-Once installed on the same browser/profile as the app, the web UI will detect the `proxy-extension` bridge automatically and route Moodle API requests through it.
-
-If the extension is not installed, the connection screen now shows an explicit installation warning with the required steps.
-
-## Development
+### Local launch
 
 Requirements:
 
@@ -120,7 +43,94 @@ Open the app locally with:
 http://localhost:5173/moodlia-analyzer/
 ```
 
-## Project Structure
+## Usage
+
+### Scope
+
+The current web app includes:
+
+- Moodle connection with token or credential-based token generation
+- Optional Chrome extension bridge for Moodle requests when browser CORS blocks direct access
+- White, high-contrast visual theme with a cleaner information hierarchy
+- Course listing and selection with a dedicated action card, inline threshold control, and direct double-click analysis
+- Course listings enriched with readable Moodle category names from the category catalog
+- Configurable passing threshold
+- Course-wide student analysis
+- Student risk classification and recommendations
+- Working UI language switching for shared labels and the main workflow screens
+- UI language support is now intentionally limited to English and Spanish, the two fully maintained catalogs
+- Nested tabbed course and student workspaces so each major area is split into focused subviews instead of one long scroll
+- Larger chart canvases for comparative views, heatmaps, and question review charts
+- Built-in explanations for every analysis block, now structured as short "what it shows / how to read it / why it matters" guides inside the chart surfaces
+- Persistent workspace navigation so the app remembers the last dashboard and student subviews
+- IndexedDB-backed local analysis cache keyed by Moodle host, course, and passing threshold for faster re-entry; entries expire after four hours and can be cleared from the connection screen
+- Lazy-loaded analytics screens and chart-heavy workspaces to reduce the initial bundle and improve startup time
+- Trend comparison views that contrast the latest 7-day window against the previous one for course activity, participation, and submissions
+- Intervention center with automatic alerts, dynamic student segments, and a prioritized intervention queue
+- Advanced student roster controls with quick filters, sorting, and CSV/JSON export
+- Expanded course analytics including engagement distributions, predicted vs actual grades, risk-ranked students, top-vs-bottom cohorts, course funnel, forum activity by risk, activity heatmaps, persistence vs consistency, submission punctuality, quiz performance by activity, course activity mix, section workload, completion bottlenecks, resource format distribution, assessment timelines, and assignment grading turnaround
+- Expanded student analytics including radar profile, percentile view, recent-vs-previous momentum summaries, quiz history, question-level quiz review, submission timing, weekly activity, activity heatmaps, submission status breakdown, forum interaction breakdown, tracked completion by activity type, grading turnaround per assignment, persistence and consistency indicators, and prediction summaries
+- Optional AI-assisted reports through a local OpenAI-compatible endpoint
+
+### Verified Moodle API coverage
+
+Validated against a live Moodle instance on April 15, 2026:
+
+- Target instance: `https://centros.edu.xunta.gal/iesmontevila/aulavirtual`
+- The provided token exposed 467 web service functions through `core_webservice_get_site_info`.
+- `core_enrol_get_my_courses` can be sparse or incomplete for some tokens, so the client falls back to `core_enrol_get_users_courses` and then `core_course_get_courses`.
+- Verified working read endpoints for analytics included course contents, enrolled users, grade items, activity completion, assignments, assignment grades, submissions, quizzes, attempt review, forums, pages, resources, calendar action events, course modules, analytics contexts, and course grade overview.
+- `mod_quiz_get_attempt_review` is now used lazily from the student assessment workspace so the app can inspect question-level outcomes without slowing down the full-course analysis phase.
+- Verified live limitations included optional logs (`report_log_get_log` failed on this Moodle service) and course completion criteria (`core_completion_get_course_completion_status` returned `nocriteriaset` when the course did not define course-level completion rules).
+
+See `MOODLE_API_AUDIT.md` for the field-level audit summary used to expand the frontend analytics.
+
+### Chrome extension bridge
+
+The Chrome MV3 extension lives in the separate `moodlia-browser-bridge` project.
+
+Use it when:
+
+- the Moodle server has broken CORS headers
+- you still want to keep the main app frontend-only
+
+Load it in Chrome:
+
+1. Open `chrome://extensions`
+2. Enable **Developer mode**
+3. Click **Load unpacked**
+4. Select your local `moodlia-browser-bridge` project directory
+
+Once installed on the same browser/profile as the app, the web UI will detect the `proxy-extension` bridge automatically and route Moodle API requests through it.
+
+If the extension is not installed, the connection screen now shows an explicit installation warning with the required steps.
+
+### Constraints
+
+- Browser access depends on the Moodle instance allowing the required REST endpoints and CORS policy.
+- Credential-based token generation is only possible when the Moodle site allows browser requests to `login/token.php`.
+- Local AI integrations expose requests from the browser directly to the configured endpoint.
+- AI report payloads omit student names and email addresses, but still contain internal identifiers and academic metrics. Use only an institution-approved endpoint.
+- Remote Moodle and AI-provider URLs must use HTTPS. HTTP is accepted only for loopback development services, and credential-bearing requests reject redirects.
+- Some Moodle tokens do not return reliable data from `core_enrol_get_my_courses`; the app already falls back to user-course and catalog endpoints to avoid an empty course picker.
+- Some Moodle services do not expose logs even when the rest of the course endpoints are available; the app treats logs as optional and keeps analysis working without them.
+- If Moodle returns invalid CORS headers, such as multiple `Access-Control-Allow-Origin` values, this frontend-only app cannot connect. In that case you need either a server-side fix or a backend/proxy.
+
+## Development
+
+### Declared dependency ranges
+
+- `react@^19.2.5`
+- `react-dom@^19.2.5`
+- `vite@^8.0.8`
+- `typescript@^6.0.2`
+- `framer-motion@^12.38.0`
+- `recharts@^3.8.1`
+- `lucide-react@^1.8.0`
+
+`package-lock.json` records the exact installed dependency versions; the ranges above come from `package.json`.
+
+### Project structure
 
 - `src/api/moodleClient.ts`: Moodle REST client for browser use.
 - `src/analysis/dataCollector.ts`: raw course and student data collection.
@@ -140,12 +150,7 @@ http://localhost:5173/moodlia-analyzer/
 - `src/lib/`: storage, formatting, i18n, shared analytics helpers, and shared UI data helpers.
 - `MOODLE_API_AUDIT.md`: live Moodle REST audit describing verified endpoints, payload coverage, and known limitations.
 
-## Repository Management
-
-- Local Git is initialized and connected to GitHub.
-- Main branch pushes are currently going to `origin/main`.
-
-## Quality Checks
+### Quality checks
 
 ```bash
 npm run check
@@ -154,6 +159,23 @@ npm run check
 This command runs linting, behavioral tests, TypeScript checking, and the production build. Tests cover Moodle authentication and REST requests, optional-endpoint fallbacks, student metrics, and browser persistence.
 
 The 2026-10-20 lockfile refresh applies compatible patches for `brace-expansion` and `source-map-js`. `npm audit --audit-level=high` reports no vulnerabilities for this lockfile; `npm run check` passes locally.
+
+## Security and privacy
+
+Moodle data is fetched directly by the browser. Profile names, Moodle URLs and non-secret settings persist locally; Moodle tokens and AI keys remain in session storage. Optional AI analysis sends selected content to the configured provider.
+
+## Documentation
+
+- [Project Pages](https://gafapa.github.io/moodlia-analyzer-web/)
+
+Build the repository documentation portal with `python tools/build-project-page.py`. Its status comes from this README; purpose and first steps are maintained in `docs/project-page.json`. The `pages.yml` workflow publishes the portal without deploying the application or changing `moodlia.com`.
+
+Browser-based Moodle analysis; [Analyzer Desktop](https://github.com/gafapa/moodlia-analyzer-desktop) provides the Python alternative.
+
+- [Source code](https://github.com/gafapa/moodlia-analyzer-web)
+- [Issue tracker](https://github.com/gafapa/moodlia-analyzer-web/issues)
+- [MoodlIA website](https://moodlia.com)
+
 
 ## License
 
