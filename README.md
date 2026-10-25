@@ -122,7 +122,7 @@ If the extension is not installed, the connection screen now shows an explicit i
 
 - `react@^19.2.5`
 - `react-dom@^19.2.5`
-- `vite@^8.0.8`
+- `vite@^8.3.5`
 - `typescript@^6.0.2`
 - `framer-motion@^12.38.0`
 - `recharts@^3.8.1`
@@ -158,7 +158,11 @@ npm run check
 
 This command runs linting, behavioral tests, TypeScript checking, and the production build. Tests cover Moodle authentication and REST requests, optional-endpoint fallbacks, student metrics, and browser persistence.
 
-The 2026-10-20 lockfile refresh applies compatible patches for `brace-expansion` and `source-map-js`. `npm audit --audit-level=high` reports no vulnerabilities for this lockfile; `npm run check` passes locally.
+The 2026-10-25 development-tool lockfile refresh updates Vite to 8.3.5,
+Vitest and its mocker to 4.1.12, and Zod to 4.6.7. The complete `npm audit`
+reports zero known vulnerabilities for this lockfile. CI checks lint, tests,
+TypeScript and the production build, and fails on moderate or higher audit
+findings with `npm audit --audit-level=moderate`.
 
 ## Security and privacy
 
